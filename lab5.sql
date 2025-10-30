@@ -1,0 +1,123 @@
+--LAB5
+--4.1 select k.nazwa from klienci k;
+-- simple alias 
+--SELECT k.nazwa, z.idzamowienia FROM klienci k, zamowienia z;
+-- cartesian product(huge row number)
+--SELECT k.nazwa, z.idzamowienia FROM klienci k, zamowienia z  
+--WHERE z.idklienta = k.idklienta;
+-- selection with when condition from cartesian product
+-- SELECT k.nazwa, z.idzamowienia FROM klienci k NATURAL JOIN zamowienia z;
+-- inner join natural, can be unsafe
+-- SELECT k.nazwa, z.idzamowienia FROM klienci k JOIN zamowienia z
+-- ON z.idklienta=k.idklienta;
+-- as previous but explicit
+-- SELECT k.nazwa, z.idzamowienia FROM klienci k JOIN zamowienia z
+-- USING (idklienta);
+-- same as prev, different syntax
+-- 4.1.1 w ktorym cartesian product? - w drugin(+teoretycznie w trzecim)
+-- 4.1.2 useless data? - same, w drugim(no link between records)
+
+-- 4.2.1 select k.idklienta, k.nazwa, z.idzamowienia, z.datarealizacji from klienci k join zamowienia z using(idklienta) where nazwa like '%Antoni%'
+-- 4.2.2 select k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji from klienci k join zamowienia z using(idklienta) where ulica like '%/%'
+-- 4.2.3 
+-- select k.idklienta, k.nazwa, k.ulica, k.miejscowosc, z.idzamowienia, z.datarealizacji from klienci k join zamowienia z using(idklienta) where miejscowosc = 'Kraków' 
+-- AND DATE_PART('month', z.datarealizacji) = 11 AND DATE_PART('year', z.datarealizacji) = DATE_PART('year', current_date)
+
+-- 4.3.1 select distinct k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji from klienci k join zamowienia z using(idklienta) where z.datarealizacji >= CURRENT_DATE - INTERVAL '15 years';
+-- 4.3.2 select distinct k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji, a.sztuk, p.nazwa from klienci k join zamowienia z using(idklienta) join artykuly a using(idzamowienia) join pudelka p using (idpudelka) where p.nazwa IN ('Kremowa fantazja', 'Kolekcja jesienna');
+-- 4.3.3 select distinct k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji, a.sztuk, p.nazwa from klienci k join zamowienia z using(idklienta) join artykuly a using(idzamowienia) join pudelka p using (idpudelka) order by k.idklienta
+-- 4.3.4 select distinct k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji from klienci k left outer join zamowienia z using(idklienta) WHERE z.idzamowienia IS NULL order by k.idklienta
+-- 4.3.5 SELECT DISTINCT k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji FROM klienci k JOIN zamowienia z USING(idklienta) WHERE date_part('month', z.datarealizacji) = 11 AND date_part('year', z.datarealizacji) = date_part('year', CURRENT_DATE);
+-- 4.3.6 select distinct k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji, a.sztuk, p.nazwa from klienci k join zamowienia z using(idklienta) join artykuly a using(idzamowienia) join pudelka p using (idpudelka) where p.nazwa IN ('Kremowa fantazja', 'Kolekcja jesienna') and sztuk >= 2;
+-- 4.3.7 select distinct k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji, a.sztuk, p.nazwa, cz.orzechy from klienci k join zamowienia z using(idklienta) join artykuly a using(idzamowienia) join pudelka p using (idpudelka) join zawartosc zw using (idpudelka) join czekoladki cz using(idczekoladki) where cz.orzechy = 'migdały'
+-- 4.4.1 select p.idpudelka, p.nazwa, z.idczekoladki, z.sztuk, c.nazwa from pudelka p left outer join zawartosc z using(idpudelka) left join czekoladki c using (idczekoladki) ORDER BY p.idpudelka
+-- 4.4.2 select p.idpudelka, p.nazwa, z.idczekoladki, z.sztuk, c.nazwa from pudelka p left outer join zawartosc z using(idpudelka) left join czekoladki c using (idczekoladki) where p.idpudelka = 'heav'
+-- 4.4.3 select p.idpudelka, p.nazwa, z.idczekoladki, z.sztuk, c.nazwa from pudelka p left outer join zawartosc z using(idpudelka) left join czekoladki c using (idczekoladki) WHERE p.nazwa ILIKE '%Kolekcja%'
+-- 4.5.1 SELECT DISTINCT    p.idpudelka, p.nazwa, p.opis, p.cena,    c.idczekoladki, c.nazwa AS nazwa_czekoladki FROM pudelka p JOIN zawartosc z USING (idpudelka) JOIN czekoladki c USING (idczekoladki) WHERE c.idczekoladki = 'd09';
+-- 4.5.2 - 4.5.4 bezsensowne, w glowie zrobilem
+-- 4.5.5 ( SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki) )
+-- EXCEPT
+-- ( SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki)
+-- WHERE c.czekolada = 'gorzka'
+-- )
+-- ORDER BY idpudelka;
+-- 4.5.6 SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena,
+--     c.nazwa, z.sztuk
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki)
+-- WHERE c.nazwa = 'Gorzka truskawkowa'
+--   AND z.sztuk >= 3;
+-- 4.5.7 (
+-- SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki)
+-- )
+-- EXCEPT
+-- (
+-- SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki)
+-- WHERE c.orzechy IS NOT NULL
+-- )
+-- ORDER BY idpudelka; that's thy except needed here. “Pudełko nie zawiera czekoladek w gorzkiej czekoladzie.” i “Pudełko zawiera jakieś czekoladki, które nie są w gorzkiej czekoladzie” nie oznaczają tego samego ;) xdd
+-- 4.5.8 SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena,
+--     c.idczekoladki, c.nazwa
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki)
+-- WHERE c.nazwa = 'Gorzka truskawkowa';
+-- 4.5.9 SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena,
+--     c.nazwa, c.nadzienie
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki)
+-- WHERE c.nadzienie IS null
+-- 4.6.1 select c.idczekoladki, c.nazwa, c.koszt from czekoladki c where c.koszt > (select koszt from czekoladki where idczekoladki = 'd08' )
+-- 4.6.2 with gorka as (
+-- 	select distinct a.idpudelka from klienci k join zamowienia z using (idklienta) join artykuly a using (idzamowienia)
+-- 	where k.nazwa = 'Górka Alicja'
+-- )
+-- select distinct kk.nazwa from klienci kk join zamowienia zz using (idklienta) join artykuly aa using(idzamowienia) join gorka using (idpudelka)
+-- where kk.nazwa <> 'Górka Alicja' 
+-- order by kk.nazwa asc
+-- 4.6.3 
+-- with katowice as (
+-- 	select distinct a.idpudelka from klienci k join zamowienia z using (idklienta) join artykuly a using (idzamowienia)
+-- 	where k.miejscowosc = 'Katowice'
+-- )
+-- select distinct kk.idklienta, kk.nazwa, kk.miejscowosc from klienci kk join zamowienia zz using (idklienta) join artykuly aa using(idzamowienia) join katowice using (idpudelka)
+-- where kk.miejscowosc <> 'Katowice' 
+-- order by kk.idklienta asc
+-- WITH pudelka_z_katowic AS ( <-- alternative with where
+--     SELECT DISTINCT a.idpudelka
+--     FROM klienci k
+--     JOIN zamowienia z USING (idklienta)
+--     JOIN artykuly a USING (idzamowienia)
+--     WHERE k.miejscowosc = 'Katowice'
+-- )
+-- SELECT DISTINCT 
+--     k.idklienta, 
+--     k.nazwa,
+-- 	k.miejscowosc
+-- FROM klienci k
+-- JOIN zamowienia z USING (idklienta)
+-- JOIN artykuly a USING (idzamowienia)
+-- WHERE a.idpudelka IN (SELECT idpudelka FROM pudelka_z_katowic) and k.miejscowosc <> 'Katowice'
+-- order by k.idklienta
+-- 4.7 w glowie
