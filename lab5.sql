@@ -120,4 +120,69 @@
 -- JOIN artykuly a USING (idzamowienia)
 -- WHERE a.idpudelka IN (SELECT idpudelka FROM pudelka_z_katowic) and k.miejscowosc <> 'Katowice'
 -- order by k.idklienta
--- 4.7 w glowie
+-- 4.7 w glowie, update:chat pasted
+-- 4.7.1 SELECT 
+--     s.imie, 
+--     s.nazwisko, 
+--     s.iddruzyny, 
+--     s.pozycja, 
+--     p.idmeczu
+-- FROM siatkarki s
+-- JOIN punkty p USING (numer, iddruzyny)
+-- WHERE p.punkty > 20
+--   AND (s.numer, s.iddruzyny, p.idmeczu) IN (
+--       SELECT numer, iddruzyny, idmeczu
+--       FROM punkty pp
+--       WHERE (pp.idmeczu, pp.punkty) IN (
+--           SELECT idmeczu, MAX(punkty)
+--           FROM punkty
+--           GROUP BY idmeczu
+--       )
+--   ); okay this is kinda cool
+-- 4.7.2 SELECT 
+--     s.imie, 
+--     s.nazwisko, 
+--     s.iddruzyny, 
+--     s.pozycja, 
+--     p.idmeczu, 
+--     p.punkty,
+--     (p.punkty = (
+--         SELECT MAX(p2.punkty)
+--         FROM punkty p2
+--         WHERE p2.idmeczu = p.idmeczu
+--     )) AS czy_mvp
+-- FROM siatkarki s
+-- JOIN punkty p USING (numer, iddruzyny)
+-- WHERE p.punkty > 20;
+-- 4.7.3 SELECT 
+--     s.imie, 
+--     s.nazwisko, 
+--     s.iddruzyny, 
+--     s.pozycja, 
+--     p.idmeczu
+-- FROM siatkarki s
+-- JOIN punkty p USING (numer, iddruzyny)
+-- JOIN druzyny d USING (iddruzyny)
+-- WHERE d.miasto = 'Łódź'
+--   AND (p.punkty = (
+--       SELECT MAX(p2.punkty)
+--       FROM punkty p2
+--       WHERE p2.idmeczu = p.idmeczu
+--   ));
+-- 4.7.4 SELECT 
+--     s.imie, 
+--     s.nazwisko, 
+--     s.iddruzyny, 
+--     s.pozycja, 
+--     p.idmeczu, 
+--     m.termin
+-- FROM siatkarki s
+-- JOIN punkty p USING (numer, iddruzyny)
+-- JOIN mecze m USING (idmeczu)
+-- WHERE p.punkty > 20
+--   AND p.punkty = (
+--       SELECT MAX(p2.punkty)
+--       FROM punkty p2
+--       WHERE p2.idmeczu = p.idmeczu
+--   );
+-- 4.7.5 idk what playoff means
