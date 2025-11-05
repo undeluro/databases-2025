@@ -1,0 +1,203 @@
+--LAB3
+--3.1.1select * from zamowienia where datarealizacji between make_date(date_part('year', CURRENT_DATE)::int, 11, 12) and make_date(date_part('year', CURRENT_DATE)::int, 11, 20);
+--3.1.2select * from zamowienia where (datarealizacji between make_date(date_part('year', CURRENT_DATE)::int, 12, 1) and make_date(date_part('year', CURRENT_DATE)::int, 12, 6) ) or ( datarealizacji between make_date(date_part('year', CURRENT_DATE)::int, 12, 15) and make_date(date_part('year', CURRENT_DATE)::int, 12, 20) );
+--3.1.3select * from zamowienia where datarealizacji >= date_trunc('year', CURRENT_DATE) + interval '11 month';
+--3.1.4select * from zamowienia where date_part('year', datarealizacji) = date_part('year', current_date) and date_part('month', datarealizacji) = 11;
+--3.1.5select * from zamowienia where date_part('year', datarealizacji) = date_part('year', current_date) and (date_part('month', datarealizacji) = 11 or date_part('month', datarealizacji) = 12);
+--3.1.6select * from zamowienia where date_part('day', datarealizacji) in (17,18,19);
+--3.1.7select * from zamowienia where date_part('week', datarealizacji) in (46,47);
+---
+--3.2.1select * from czekoladki where nazwa like 'S%';
+--select * from czekoladki where nazwa ~ '^S';
+--3.2.2select * from czekoladki where nazwa like 'S%i';
+--WHERE nazwa ~ '^S.*i$'
+--3.2.3select * from czekoladki where nazwa like 'S% m%';
+--select * from czekoladki WHERE nazwa SIMILAR TO 'S% (m%|% m%)'
+--3.2.4select * from czekoladki WHERE nazwa SIMILAR TO '(A|B|C)%'
+--3.2.5WHERE nazwa LIKE '%orzech%' OR nazwa LIKE '%Orzech%'
+--select * from czekoladki where nazwa ~* 'orzech'
+--3.2.6select * from czekoladki where nazwa like 'S%m%';
+--3.2.7 select * from czekoladki WHERE nazwa LIKE '%maliny%' OR nazwa LIKE '%truskawki%'
+--3.2.8 select * from czekoladki WHERE nazwa !~ '^[D-KST]'
+--3.2.9 select * from czekoladki where nazwa ~ '^Słod'
+--3.2.10select * from czekoladki where nazwa !~ ' '
+--select * from czekoladki where nazwa not like '% %'
+--3.3.1select distinct miejscowosc from klienci where miejscowosc like '% %'
+--3.3.2select nazwa, telefon from klienci where telefon like '012%'
+--3.3.3select nazwa, telefon from klienci where telefon not like '012%'
+--3.4.1 SELECT * FROM czekoladki WHERE masa BETWEEN 15 AND 24
+-- UNION
+-- SELECT * FROM czekoladki WHERE koszt BETWEEN 15 AND 24;
+-- 3.4.2select * from czekoladki where masa between 25 and 35 EXCEPT SELECT * FROM czekoladki
+-- WHERE koszt BETWEEN 25 AND 35;
+-- 3.4.3(
+--   SELECT *
+--   FROM czekoladki
+--   WHERE masa BETWEEN 15 AND 24 AND koszt BETWEEN 15 AND 24
+-- )
+-- UNION
+-- (
+--   SELECT *
+--   FROM czekoladki
+--   WHERE masa BETWEEN 25 AND 35 AND koszt BETWEEN 25 AND 35
+-- );
+-- 3.4.4 select *
+-- FROM czekoladki
+-- WHERE masa BETWEEN 15 AND 24
+-- intersect
+-- SELECT *
+-- FROM czekoladki
+-- WHERE koszt BETWEEN 15 AND 24;
+-- 3.4.5 SELECT *
+-- FROM czekoladki
+-- WHERE masa BETWEEN 25 AND 35
+
+-- EXCEPT
+
+-- (
+--   SELECT *
+--   FROM czekoladki
+--   WHERE koszt BETWEEN 15 AND 24
+--   UNION
+--   SELECT *
+--   FROM czekoladki
+--   WHERE koszt BETWEEN 29 AND 35
+-- );
+-- 3.5.1 select idklienta from klienci except select idklienta from zamowienia order by idklienta asc
+-- 3.5.2 SELECT idpudelka FROM pudelka except SELECT idpudelka FROM zawartosc;
+-- 3.5.3 select nazwa from klienci where nazwa ilike '%rz%' union select nazwa from czekoladki where nazwa ilike '%rz%' union select nazwa from pudelka where nazwa ilike '%rz%'
+-- 3.5.4 select idczekoladki from czekoladki except select idczekoladki from zawartosc
+-- 3.6.1 SELECT 
+--     idmeczu,
+--     SUM(CASE WHEN iddruzyny = gospodarze THEN punkty END) AS suma_gospodarzy,
+--     SUM(CASE WHEN iddruzyny = goscie THEN punkty END) AS suma_gosci
+-- FROM mecze
+-- NATURAL JOIN punkty
+-- GROUP BY idmeczu
+-- order by idmeczu asc;
+-- 3.6.2 SELECT 
+--     idmeczu,
+--     SUM(CASE WHEN iddruzyny = gospodarze THEN punkty END) AS suma_gospodarzy,
+--     SUM(CASE WHEN iddruzyny = goscie THEN punkty END) AS suma_gosci
+-- FROM mecze NATURAL JOIN punkty
+-- where idmeczu in (
+-- 	select idmeczu from statystyki 
+-- 	where array_length(goscie, 1) = 5 and GREATEST(goscie[5], gospodarze[5]) > 15
+-- )
+-- GROUP BY idmeczu
+-- order by idmeczu asc;
+-- 3.6.3 SELECT 
+--     idmeczu,
+--     CONCAT(
+--         SUM(CASE WHEN gospodarze[i] > goscie[i] THEN 1 ELSE 0 END),
+--         ':',
+--         SUM(CASE WHEN goscie[i] > gospodarze[i] THEN 1 ELSE 0 END)
+--     ) AS wynik
+-- FROM statystyki,
+-- LATERAL generate_subscripts(gospodarze, 1) AS i  -- iterate over array elements
+-- GROUP BY idmeczu
+-- ORDER BY idmeczu;
+-- 3.6.4 nah
+-- 3.6.5 nah i have life thank u
+-- 3.7.1 select * from siatkarki except select numer, iddruzyny, nazwisko, imie, pozycja from wystepy
+-- 3.7.2  SELECT imie, nazwisko, iddruzyny, pozycja FROM siatkarki WHERE pozycja = 'libero'
+-- INTERSECT
+--   SELECT imie, nazwisko, iddruzyny, pozycja FROM wystepy WHERE pozycja <> 'libero'
+-- 3.7.3 (
+--   SELECT imie, nazwisko, iddruzyny, pozycja FROM siatkarki WHERE pozycja = 'libero'
+-- )
+-- EXCEPT
+-- (
+--   SELECT imie, nazwisko, iddruzyny, pozycja FROM wystepy WHERE pozycja <> 'libero'
+-- );
+-- 3.7.4(
+--   SELECT imie, nazwisko, iddruzyny, pozycja FROM siatkarki WHERE pozycja <> 'libero'
+-- )
+-- INTERSECT
+-- (
+--   SELECT imie, nazwisko, iddruzyny, pozycja FROM wystepy WHERE pozycja = 'libero'
+-- );
+-- 3.7.5 (
+--   SELECT imie, nazwisko, iddruzyny, pozycja FROM siatkarki WHERE pozycja <> 'libero'
+-- )
+-- EXCEPT
+-- (
+--   SELECT imie, nazwisko, iddruzyny, pozycja FROM wystepy WHERE pozycja = 'libero'
+-- );
+-- 3.8.1 select numer, iddruzyny, imie, nazwisko from siatkarki except select distinct numer, iddruzyny, imie, nazwisko from mvp
+-- 3.8.2 (
+--   SELECT imie, nazwisko, iddruzyny, pozycja
+--   FROM mvp NATURAL JOIN statystyki
+--   WHERE array_length(gospodarze, 1) = 3
+-- )
+-- INTERSECT
+-- (
+--   SELECT imie, nazwisko, iddruzyny, pozycja
+--   FROM mvp NATURAL JOIN statystyki
+--   WHERE array_length(gospodarze, 1) = 4
+-- )
+-- INTERSECT
+-- (
+--   SELECT imie, nazwisko, iddruzyny, pozycja
+--   FROM mvp NATURAL JOIN statystyki
+--   WHERE array_length(gospodarze, 1) = 5
+-- );
+-- 3.8.3(
+--   SELECT imie, nazwisko, iddruzyny, pozycja
+--   FROM mvp
+-- )
+-- EXCEPT
+-- (
+--   SELECT imie, nazwisko, iddruzyny, pozycja
+--   FROM mvp NATURAL JOIN (
+--       SELECT idmeczu
+--       FROM (
+--           SELECT idmeczu,
+--                  SUM(CASE WHEN gospodarze[i] > goscie[i] THEN 1 ELSE 0 END) AS wygrane_gosp,
+--                  SUM(CASE WHEN goscie[i] > gospodarze[i] THEN 1 ELSE 0 END) AS wygrane_gosci
+--           FROM statystyki s, LATERAL generate_subscripts(gospodarze, 1) AS i
+--           GROUP BY idmeczu
+--       ) x
+--       WHERE wygrane_gosp > wygrane_gosci
+--   ) AS gospodarze_wygrali
+-- );
+-- (
+--   SELECT imie, nazwisko, iddruzyny, pozycja
+--   FROM mvp NATURAL JOIN (
+--       SELECT idmeczu
+--       FROM (
+--           SELECT idmeczu,
+--                  SUM(CASE WHEN gospodarze[i] > goscie[i] THEN 1 ELSE 0 END) AS wygrane_gosp,
+--                  SUM(CASE WHEN goscie[i] > gospodarze[i] THEN 1 ELSE 0 END) AS wygrane_gosci
+--           FROM statystyki s, LATERAL generate_subscripts(gospodarze, 1) AS i
+--           GROUP BY idmeczu
+--       ) x
+--       WHERE wygrane_gosp > wygrane_gosci
+--   ) AS gospodarze_wygrali
+-- )
+-- INTERSECT
+-- (
+--   SELECT imie, nazwisko, iddruzyny, pozycja
+--   FROM mvp NATURAL JOIN (
+--       SELECT idmeczu
+--       FROM (
+--           SELECT idmeczu,
+--                  SUM(CASE WHEN gospodarze[i] > goscie[i] THEN 1 ELSE 0 END) AS wygrane_gosp,
+--                  SUM(CASE WHEN goscie[i] > gospodarze[i] THEN 1 ELSE 0 END) AS wygrane_gosci
+--           FROM statystyki s, LATERAL generate_subscripts(gospodarze, 1) AS i
+--           GROUP BY idmeczu
+--       ) x
+--       WHERE wygrane_gosci > wygrane_gosp
+--   ) AS goscie_wygrali
+-- );
+-- 3.8.5 (
+--   SELECT imie, nazwisko, iddruzyny, pozycja
+--   FROM mvp
+-- )
+-- EXCEPT
+-- (
+--   SELECT imie, nazwisko, iddruzyny, pozycja
+--   FROM mvp NATURAL JOIN statystyki
+--   WHERE array_length(gospodarze, 1) = 5
+-- );
+-- cinema

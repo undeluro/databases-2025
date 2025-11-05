@@ -1,203 +1,188 @@
---LAB3
---3.1.1select * from zamowienia where datarealizacji between make_date(date_part('year', CURRENT_DATE)::int, 11, 12) and make_date(date_part('year', CURRENT_DATE)::int, 11, 20);
---3.1.2select * from zamowienia where (datarealizacji between make_date(date_part('year', CURRENT_DATE)::int, 12, 1) and make_date(date_part('year', CURRENT_DATE)::int, 12, 6) ) or ( datarealizacji between make_date(date_part('year', CURRENT_DATE)::int, 12, 15) and make_date(date_part('year', CURRENT_DATE)::int, 12, 20) );
---3.1.3select * from zamowienia where datarealizacji >= date_trunc('year', CURRENT_DATE) + interval '11 month';
---3.1.4select * from zamowienia where date_part('year', datarealizacji) = date_part('year', current_date) and date_part('month', datarealizacji) = 11;
---3.1.5select * from zamowienia where date_part('year', datarealizacji) = date_part('year', current_date) and (date_part('month', datarealizacji) = 11 or date_part('month', datarealizacji) = 12);
---3.1.6select * from zamowienia where date_part('day', datarealizacji) in (17,18,19);
---3.1.7select * from zamowienia where date_part('week', datarealizacji) in (46,47);
----
---3.2.1select * from czekoladki where nazwa like 'S%';
---select * from czekoladki where nazwa ~ '^S';
---3.2.2select * from czekoladki where nazwa like 'S%i';
---WHERE nazwa ~ '^S.*i$'
---3.2.3select * from czekoladki where nazwa like 'S% m%';
---select * from czekoladki WHERE nazwa SIMILAR TO 'S% (m%|% m%)'
---3.2.4select * from czekoladki WHERE nazwa SIMILAR TO '(A|B|C)%'
---3.2.5WHERE nazwa LIKE '%orzech%' OR nazwa LIKE '%Orzech%'
---select * from czekoladki where nazwa ~* 'orzech'
---3.2.6select * from czekoladki where nazwa like 'S%m%';
---3.2.7 select * from czekoladki WHERE nazwa LIKE '%maliny%' OR nazwa LIKE '%truskawki%'
---3.2.8 select * from czekoladki WHERE nazwa !~ '^[D-KST]'
---3.2.9 select * from czekoladki where nazwa ~ '^Słod'
---3.2.10select * from czekoladki where nazwa !~ ' '
---select * from czekoladki where nazwa not like '% %'
---3.3.1select distinct miejscowosc from klienci where miejscowosc like '% %'
---3.3.2select nazwa, telefon from klienci where telefon like '012%'
---3.3.3select nazwa, telefon from klienci where telefon not like '012%'
---3.4.1 SELECT * FROM czekoladki WHERE masa BETWEEN 15 AND 24
--- UNION
--- SELECT * FROM czekoladki WHERE koszt BETWEEN 15 AND 24;
--- 3.4.2select * from czekoladki where masa between 25 and 35 EXCEPT SELECT * FROM czekoladki
--- WHERE koszt BETWEEN 25 AND 35;
--- 3.4.3(
---   SELECT *
---   FROM czekoladki
---   WHERE masa BETWEEN 15 AND 24 AND koszt BETWEEN 15 AND 24
--- )
--- UNION
--- (
---   SELECT *
---   FROM czekoladki
---   WHERE masa BETWEEN 25 AND 35 AND koszt BETWEEN 25 AND 35
--- );
--- 3.4.4 select *
--- FROM czekoladki
--- WHERE masa BETWEEN 15 AND 24
--- intersect
--- SELECT *
--- FROM czekoladki
--- WHERE koszt BETWEEN 15 AND 24;
--- 3.4.5 SELECT *
--- FROM czekoladki
--- WHERE masa BETWEEN 25 AND 35
+--LAB4
+--4.1 select k.nazwa from klienci k;
+-- simple alias 
+--SELECT k.nazwa, z.idzamowienia FROM klienci k, zamowienia z;
+-- cartesian product(huge row number)
+--SELECT k.nazwa, z.idzamowienia FROM klienci k, zamowienia z  
+--WHERE z.idklienta = k.idklienta;
+-- selection with when condition from cartesian product
+-- SELECT k.nazwa, z.idzamowienia FROM klienci k NATURAL JOIN zamowienia z;
+-- inner join natural, can be unsafe
+-- SELECT k.nazwa, z.idzamowienia FROM klienci k JOIN zamowienia z
+-- ON z.idklienta=k.idklienta;
+-- as previous but explicit
+-- SELECT k.nazwa, z.idzamowienia FROM klienci k JOIN zamowienia z
+-- USING (idklienta);
+-- same as prev, different syntax
+-- 4.1.1 w ktorym cartesian product? - w drugin(+teoretycznie w trzecim)
+-- 4.1.2 useless data? - same, w drugim(no link between records)
 
--- EXCEPT
+-- 4.2.1 select k.idklienta, k.nazwa, z.idzamowienia, z.datarealizacji from klienci k join zamowienia z using(idklienta) where nazwa like '%Antoni%'
+-- 4.2.2 select k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji from klienci k join zamowienia z using(idklienta) where ulica like '%/%'
+-- 4.2.3 
+-- select k.idklienta, k.nazwa, k.ulica, k.miejscowosc, z.idzamowienia, z.datarealizacji from klienci k join zamowienia z using(idklienta) where miejscowosc = 'Kraków' 
+-- AND DATE_PART('month', z.datarealizacji) = 11 AND DATE_PART('year', z.datarealizacji) = DATE_PART('year', current_date)
 
--- (
---   SELECT *
---   FROM czekoladki
---   WHERE koszt BETWEEN 15 AND 24
---   UNION
---   SELECT *
---   FROM czekoladki
---   WHERE koszt BETWEEN 29 AND 35
--- );
--- 3.5.1 select idklienta from klienci except select idklienta from zamowienia order by idklienta asc
--- 3.5.2 SELECT idpudelka FROM pudelka except SELECT idpudelka FROM zawartosc;
--- 3.5.3 select nazwa from klienci where nazwa ilike '%rz%' union select nazwa from czekoladki where nazwa ilike '%rz%' union select nazwa from pudelka where nazwa ilike '%rz%'
--- 3.5.4 select idczekoladki from czekoladki except select idczekoladki from zawartosc
--- 3.6.1 SELECT 
---     idmeczu,
---     SUM(CASE WHEN iddruzyny = gospodarze THEN punkty END) AS suma_gospodarzy,
---     SUM(CASE WHEN iddruzyny = goscie THEN punkty END) AS suma_gosci
--- FROM mecze
--- NATURAL JOIN punkty
--- GROUP BY idmeczu
--- order by idmeczu asc;
--- 3.6.2 SELECT 
---     idmeczu,
---     SUM(CASE WHEN iddruzyny = gospodarze THEN punkty END) AS suma_gospodarzy,
---     SUM(CASE WHEN iddruzyny = goscie THEN punkty END) AS suma_gosci
--- FROM mecze NATURAL JOIN punkty
--- where idmeczu in (
--- 	select idmeczu from statystyki 
--- 	where array_length(goscie, 1) = 5 and GREATEST(goscie[5], gospodarze[5]) > 15
+-- 4.3.1 select distinct k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji from klienci k join zamowienia z using(idklienta) where z.datarealizacji >= CURRENT_DATE - INTERVAL '15 years';
+-- 4.3.2 select distinct k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji, a.sztuk, p.nazwa from klienci k join zamowienia z using(idklienta) join artykuly a using(idzamowienia) join pudelka p using (idpudelka) where p.nazwa IN ('Kremowa fantazja', 'Kolekcja jesienna');
+-- 4.3.3 select distinct k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji, a.sztuk, p.nazwa from klienci k join zamowienia z using(idklienta) join artykuly a using(idzamowienia) join pudelka p using (idpudelka) order by k.idklienta
+-- 4.3.4 select distinct k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji from klienci k left outer join zamowienia z using(idklienta) WHERE z.idzamowienia IS NULL order by k.idklienta
+-- 4.3.5 SELECT DISTINCT k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji FROM klienci k JOIN zamowienia z USING(idklienta) WHERE date_part('month', z.datarealizacji) = 11 AND date_part('year', z.datarealizacji) = date_part('year', CURRENT_DATE);
+-- 4.3.6 select distinct k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji, a.sztuk, p.nazwa from klienci k join zamowienia z using(idklienta) join artykuly a using(idzamowienia) join pudelka p using (idpudelka) where p.nazwa IN ('Kremowa fantazja', 'Kolekcja jesienna') and sztuk >= 2;
+-- 4.3.7 select distinct k.idklienta, k.nazwa, k.ulica, z.idzamowienia, z.datarealizacji, a.sztuk, p.nazwa, cz.orzechy from klienci k join zamowienia z using(idklienta) join artykuly a using(idzamowienia) join pudelka p using (idpudelka) join zawartosc zw using (idpudelka) join czekoladki cz using(idczekoladki) where cz.orzechy = 'migdały'
+-- 4.4.1 select p.idpudelka, p.nazwa, z.idczekoladki, z.sztuk, c.nazwa from pudelka p left outer join zawartosc z using(idpudelka) left join czekoladki c using (idczekoladki) ORDER BY p.idpudelka
+-- 4.4.2 select p.idpudelka, p.nazwa, z.idczekoladki, z.sztuk, c.nazwa from pudelka p left outer join zawartosc z using(idpudelka) left join czekoladki c using (idczekoladki) where p.idpudelka = 'heav'
+-- 4.4.3 select p.idpudelka, p.nazwa, z.idczekoladki, z.sztuk, c.nazwa from pudelka p left outer join zawartosc z using(idpudelka) left join czekoladki c using (idczekoladki) WHERE p.nazwa ILIKE '%Kolekcja%'
+-- 4.5.1 SELECT DISTINCT    p.idpudelka, p.nazwa, p.opis, p.cena,    c.idczekoladki, c.nazwa AS nazwa_czekoladki FROM pudelka p JOIN zawartosc z USING (idpudelka) JOIN czekoladki c USING (idczekoladki) WHERE c.idczekoladki = 'd09';
+-- 4.5.2 - 4.5.4 bezsensowne, w glowie zrobilem
+-- 4.5.5 ( SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki) )
+-- EXCEPT
+-- ( SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki)
+-- WHERE c.czekolada = 'gorzka'
 -- )
--- GROUP BY idmeczu
--- order by idmeczu asc;
--- 3.6.3 SELECT 
---     idmeczu,
---     CONCAT(
---         SUM(CASE WHEN gospodarze[i] > goscie[i] THEN 1 ELSE 0 END),
---         ':',
---         SUM(CASE WHEN goscie[i] > gospodarze[i] THEN 1 ELSE 0 END)
---     ) AS wynik
--- FROM statystyki,
--- LATERAL generate_subscripts(gospodarze, 1) AS i  -- iterate over array elements
--- GROUP BY idmeczu
--- ORDER BY idmeczu;
--- 3.6.4 nah
--- 3.6.5 nah i have life thank u
--- 3.7.1 select * from siatkarki except select numer, iddruzyny, nazwisko, imie, pozycja from wystepy
--- 3.7.2  SELECT imie, nazwisko, iddruzyny, pozycja FROM siatkarki WHERE pozycja = 'libero'
--- INTERSECT
---   SELECT imie, nazwisko, iddruzyny, pozycja FROM wystepy WHERE pozycja <> 'libero'
--- 3.7.3 (
---   SELECT imie, nazwisko, iddruzyny, pozycja FROM siatkarki WHERE pozycja = 'libero'
+-- ORDER BY idpudelka;
+-- 4.5.6 SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena,
+--     c.nazwa, z.sztuk
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki)
+-- WHERE c.nazwa = 'Gorzka truskawkowa'
+--   AND z.sztuk >= 3;
+-- 4.5.7 (
+-- SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki)
 -- )
 -- EXCEPT
 -- (
---   SELECT imie, nazwisko, iddruzyny, pozycja FROM wystepy WHERE pozycja <> 'libero'
--- );
--- 3.7.4(
---   SELECT imie, nazwisko, iddruzyny, pozycja FROM siatkarki WHERE pozycja <> 'libero'
+-- SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki)
+-- WHERE c.orzechy IS NOT NULL
 -- )
--- INTERSECT
--- (
---   SELECT imie, nazwisko, iddruzyny, pozycja FROM wystepy WHERE pozycja = 'libero'
--- );
--- 3.7.5 (
---   SELECT imie, nazwisko, iddruzyny, pozycja FROM siatkarki WHERE pozycja <> 'libero'
+-- ORDER BY idpudelka; that's thy except needed here. “Pudełko nie zawiera czekoladek w gorzkiej czekoladzie.” i “Pudełko zawiera jakieś czekoladki, które nie są w gorzkiej czekoladzie” nie oznaczają tego samego ;) xdd
+-- 4.5.8 SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena,
+--     c.idczekoladki, c.nazwa
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki)
+-- WHERE c.nazwa = 'Gorzka truskawkowa';
+-- 4.5.9 SELECT DISTINCT
+--     p.idpudelka, p.nazwa, p.opis, p.cena,
+--     c.nazwa, c.nadzienie
+-- FROM pudelka p
+-- JOIN zawartosc z USING (idpudelka)
+-- JOIN czekoladki c USING (idczekoladki)
+-- WHERE c.nadzienie IS null
+-- 4.6.1 select c.idczekoladki, c.nazwa, c.koszt from czekoladki c where c.koszt > (select koszt from czekoladki where idczekoladki = 'd08' )
+-- 4.6.2 with gorka as (
+-- 	select distinct a.idpudelka from klienci k join zamowienia z using (idklienta) join artykuly a using (idzamowienia)
+-- 	where k.nazwa = 'Górka Alicja'
 -- )
--- EXCEPT
--- (
---   SELECT imie, nazwisko, iddruzyny, pozycja FROM wystepy WHERE pozycja = 'libero'
--- );
--- 3.8.1 select numer, iddruzyny, imie, nazwisko from siatkarki except select distinct numer, iddruzyny, imie, nazwisko from mvp
--- 3.8.2 (
---   SELECT imie, nazwisko, iddruzyny, pozycja
---   FROM mvp NATURAL JOIN statystyki
---   WHERE array_length(gospodarze, 1) = 3
+-- select distinct kk.nazwa from klienci kk join zamowienia zz using (idklienta) join artykuly aa using(idzamowienia) join gorka using (idpudelka)
+-- where kk.nazwa <> 'Górka Alicja' 
+-- order by kk.nazwa asc
+-- 4.6.3 
+-- with katowice as (
+-- 	select distinct a.idpudelka from klienci k join zamowienia z using (idklienta) join artykuly a using (idzamowienia)
+-- 	where k.miejscowosc = 'Katowice'
 -- )
--- INTERSECT
--- (
---   SELECT imie, nazwisko, iddruzyny, pozycja
---   FROM mvp NATURAL JOIN statystyki
---   WHERE array_length(gospodarze, 1) = 4
+-- select distinct kk.idklienta, kk.nazwa, kk.miejscowosc from klienci kk join zamowienia zz using (idklienta) join artykuly aa using(idzamowienia) join katowice using (idpudelka)
+-- where kk.miejscowosc <> 'Katowice' 
+-- order by kk.idklienta asc
+-- WITH pudelka_z_katowic AS ( <-- alternative with where
+--     SELECT DISTINCT a.idpudelka
+--     FROM klienci k
+--     JOIN zamowienia z USING (idklienta)
+--     JOIN artykuly a USING (idzamowienia)
+--     WHERE k.miejscowosc = 'Katowice'
 -- )
--- INTERSECT
--- (
---   SELECT imie, nazwisko, iddruzyny, pozycja
---   FROM mvp NATURAL JOIN statystyki
---   WHERE array_length(gospodarze, 1) = 5
--- );
--- 3.8.3(
---   SELECT imie, nazwisko, iddruzyny, pozycja
---   FROM mvp
--- )
--- EXCEPT
--- (
---   SELECT imie, nazwisko, iddruzyny, pozycja
---   FROM mvp NATURAL JOIN (
---       SELECT idmeczu
---       FROM (
---           SELECT idmeczu,
---                  SUM(CASE WHEN gospodarze[i] > goscie[i] THEN 1 ELSE 0 END) AS wygrane_gosp,
---                  SUM(CASE WHEN goscie[i] > gospodarze[i] THEN 1 ELSE 0 END) AS wygrane_gosci
---           FROM statystyki s, LATERAL generate_subscripts(gospodarze, 1) AS i
+-- SELECT DISTINCT 
+--     k.idklienta, 
+--     k.nazwa,
+-- 	k.miejscowosc
+-- FROM klienci k
+-- JOIN zamowienia z USING (idklienta)
+-- JOIN artykuly a USING (idzamowienia)
+-- WHERE a.idpudelka IN (SELECT idpudelka FROM pudelka_z_katowic) and k.miejscowosc <> 'Katowice'
+-- order by k.idklienta
+-- 4.7 w glowie, update:chat pasted
+-- 4.7.1 SELECT 
+--     s.imie, 
+--     s.nazwisko, 
+--     s.iddruzyny, 
+--     s.pozycja, 
+--     p.idmeczu
+-- FROM siatkarki s
+-- JOIN punkty p USING (numer, iddruzyny)
+-- WHERE p.punkty > 20
+--   AND (s.numer, s.iddruzyny, p.idmeczu) IN (
+--       SELECT numer, iddruzyny, idmeczu
+--       FROM punkty pp
+--       WHERE (pp.idmeczu, pp.punkty) IN (
+--           SELECT idmeczu, MAX(punkty)
+--           FROM punkty
 --           GROUP BY idmeczu
---       ) x
---       WHERE wygrane_gosp > wygrane_gosci
---   ) AS gospodarze_wygrali
--- );
--- (
---   SELECT imie, nazwisko, iddruzyny, pozycja
---   FROM mvp NATURAL JOIN (
---       SELECT idmeczu
---       FROM (
---           SELECT idmeczu,
---                  SUM(CASE WHEN gospodarze[i] > goscie[i] THEN 1 ELSE 0 END) AS wygrane_gosp,
---                  SUM(CASE WHEN goscie[i] > gospodarze[i] THEN 1 ELSE 0 END) AS wygrane_gosci
---           FROM statystyki s, LATERAL generate_subscripts(gospodarze, 1) AS i
---           GROUP BY idmeczu
---       ) x
---       WHERE wygrane_gosp > wygrane_gosci
---   ) AS gospodarze_wygrali
--- )
--- INTERSECT
--- (
---   SELECT imie, nazwisko, iddruzyny, pozycja
---   FROM mvp NATURAL JOIN (
---       SELECT idmeczu
---       FROM (
---           SELECT idmeczu,
---                  SUM(CASE WHEN gospodarze[i] > goscie[i] THEN 1 ELSE 0 END) AS wygrane_gosp,
---                  SUM(CASE WHEN goscie[i] > gospodarze[i] THEN 1 ELSE 0 END) AS wygrane_gosci
---           FROM statystyki s, LATERAL generate_subscripts(gospodarze, 1) AS i
---           GROUP BY idmeczu
---       ) x
---       WHERE wygrane_gosci > wygrane_gosp
---   ) AS goscie_wygrali
--- );
--- 3.8.5 (
---   SELECT imie, nazwisko, iddruzyny, pozycja
---   FROM mvp
--- )
--- EXCEPT
--- (
---   SELECT imie, nazwisko, iddruzyny, pozycja
---   FROM mvp NATURAL JOIN statystyki
---   WHERE array_length(gospodarze, 1) = 5
--- );
--- cinema
+--       )
+--   ); okay this is kinda cool
+-- 4.7.2 SELECT 
+--     s.imie, 
+--     s.nazwisko, 
+--     s.iddruzyny, 
+--     s.pozycja, 
+--     p.idmeczu, 
+--     p.punkty,
+--     (p.punkty = (
+--         SELECT MAX(p2.punkty)
+--         FROM punkty p2
+--         WHERE p2.idmeczu = p.idmeczu
+--     )) AS czy_mvp
+-- FROM siatkarki s
+-- JOIN punkty p USING (numer, iddruzyny)
+-- WHERE p.punkty > 20;
+-- 4.7.3 SELECT 
+--     s.imie, 
+--     s.nazwisko, 
+--     s.iddruzyny, 
+--     s.pozycja, 
+--     p.idmeczu
+-- FROM siatkarki s
+-- JOIN punkty p USING (numer, iddruzyny)
+-- JOIN druzyny d USING (iddruzyny)
+-- WHERE d.miasto = 'Łódź'
+--   AND (p.punkty = (
+--       SELECT MAX(p2.punkty)
+--       FROM punkty p2
+--       WHERE p2.idmeczu = p.idmeczu
+--   ));
+-- 4.7.4 SELECT 
+--     s.imie, 
+--     s.nazwisko, 
+--     s.iddruzyny, 
+--     s.pozycja, 
+--     p.idmeczu, 
+--     m.termin
+-- FROM siatkarki s
+-- JOIN punkty p USING (numer, iddruzyny)
+-- JOIN mecze m USING (idmeczu)
+-- WHERE p.punkty > 20
+--   AND p.punkty = (
+--       SELECT MAX(p2.punkty)
+--       FROM punkty p2
+--       WHERE p2.idmeczu = p.idmeczu
+--   );
+-- 4.7.5 idk what playoff means
