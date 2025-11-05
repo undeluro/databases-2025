@@ -1,0 +1,53 @@
+--LAB 5(funkcje agregujace)
+--5.1.1select count(*) as liczba_czekoladek from czekoladki
+--5.1.2select count(*) as liczba_czekoladek from czekoladki cz where cz.nadzienie is not null;
+--one more way: select count(cz.nadzienie) as lb_cz_na from czekoladki cz;
+--5.1.3  
+-- select idpudelka from zawartosc group by idpudelka
+-- having sum(sztuk) = ( select max(suma)
+--     from (
+--         select sum(sztuk) AS suma
+--         from zawartosc
+--         group by idpudelka
+--     ) as pod
+-- ); okay thats interesting
+--5.1.4select idpudelka, nazwa, sum(sztuk) as suma
+-- 	from pudelka join zawartosc using(idpudelka)
+-- 	group by idpudelka
+-- 	order by suma desc
+-- 5.1.5select 
+-- 	p.idpudelka, 
+-- 	sum(CASE WHEN c.orzechy IS NULL THEN z.sztuk ELSE 0 END) AS bez_orzechow
+-- from pudelka p left join zawartosc z using (idpudelka) left join czekoladki c using (idczekoladki)
+-- group by p.idpudelka order by p.idpudelka;
+--5.2.1 select z.idpudelka, sum(cz.masa*z.sztuk) as mass from zawartosc z join czekoladki cz using(idczekoladki) group by z.idpudelka order by mass desc
+--5.2.2 select z.idpudelka, sum(cz.masa*z.sztuk) as mass from zawartosc z join czekoladki cz using(idczekoladki) 
+-- group by z.idpudelka having sum(cz.masa*z.sztuk) = ( select max(suma)
+--     from (
+--         select sum(cz.masa*z.sztuk) AS suma
+--         from zawartosc join czekoladki using(idczekoladki)
+--         group by idpudelka
+--     ) as pod
+-- )
+-- order by mass desc; not sure why this doesnt work
+-- WITH masa AS (
+--   SELECT idpudelka, SUM(cz.masa*z.sztuk) AS mass
+--   FROM zawartosc z
+--   JOIN czekoladki cz USING(idczekoladki)
+--   GROUP BY idpudelka
+-- )
+-- SELECT idpudelka, mass
+-- FROM masa
+-- WHERE mass = (SELECT MAX(mass) FROM masa)
+-- ORDER BY mass DESC; THIS WORKS tho
+-- 5.2.3SELECT 
+--     AVG(masa_pudelka) AS srednia_masa_pudelka
+-- FROM (
+--     SELECT SUM(z.sztuk * c.masa) AS masa_pudelka
+--     FROM zawartosc z
+--     JOIN czekoladki c USING (idczekoladki)
+--     GROUP BY z.idpudelka
+-- ) AS pod;
+-- 5.3.1 select count(*) as num_per_date, datarealizacji from zamowienia group by datarealizacji order by datarealizacji asc
+-- 5.3.2 select count(*) as cnt_zamowien from zamowienia 
+select idzamowienia, sum(art.sztuk*p.cena) from zamowienia z join artukuly art using(idzamowienia) group by idzamowienia
