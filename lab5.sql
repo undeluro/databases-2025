@@ -1,4 +1,4 @@
---LAB5
+--LAB4
 --4.1 select k.nazwa from klienci k;
 -- simple alias 
 --SELECT k.nazwa, z.idzamowienia FROM klienci k, zamowienia z;

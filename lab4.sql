@@ -1,4 +1,4 @@
---LAB4
+--LAB3
 --3.1.1select * from zamowienia where datarealizacji between make_date(date_part('year', CURRENT_DATE)::int, 11, 12) and make_date(date_part('year', CURRENT_DATE)::int, 11, 20);
 --3.1.2select * from zamowienia where (datarealizacji between make_date(date_part('year', CURRENT_DATE)::int, 12, 1) and make_date(date_part('year', CURRENT_DATE)::int, 12, 6) ) or ( datarealizacji between make_date(date_part('year', CURRENT_DATE)::int, 12, 15) and make_date(date_part('year', CURRENT_DATE)::int, 12, 20) );
 --3.1.3select * from zamowienia where datarealizacji >= date_trunc('year', CURRENT_DATE) + interval '11 month';
