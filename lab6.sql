@@ -1,4 +1,4 @@
---lab6(Data manipulation, INSERT, UPDATE, DELETE.)
+--LAB(Data manipulation, INSERT, UPDATE, DELETE.)
 --6.1.(1) INSERT INTO czekoladki (idczekoladki, nazwa, czekolada, orzechy, nadzienie, opis, koszt, masa)
 --VALUES ('W98', 'Biały kieł', 'biała', 'laskowe', 'marcepan', 'Rozpływające się w rękach i kieszeniach', 0.45, 20);
 --SELECT * FROM czekoladki WHERE idczekoladki = 'W98';
