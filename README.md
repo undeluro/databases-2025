@@ -1,6 +1,6 @@
 # Data Engineering — Course Repository
 
-This repository contains notebooks for the Data Engineering course.
+This repository contains some lab solutions for the Databases course.
 
 ## Absolute cinema resources
 
