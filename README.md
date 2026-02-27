@@ -1,4 +1,4 @@
-# Data Engineering — Course Repository
+# Databases — Course Repository
 
 This repository contains some lab solutions for the Databases course.
 
